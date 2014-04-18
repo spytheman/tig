@@ -357,7 +357,7 @@ static bool status_empty = false;
 
 /* Update status and title window. */
 static bool
-update_status_window(struct view *view, const char *msg, va_list args)
+update_status_window(struct view *view, const char *right, const char *msg, va_list args)
 {
 	if (input_mode)
 		return false;
@@ -373,6 +373,19 @@ update_status_window(struct view *view, const char *msg, va_list args)
 			status_empty = true;
 		}
 		wclrtoeol(status_win);
+
+		if (right && *right) {
+			size_t rightlen = strlen(right);
+			int x, y, width, ___;
+
+			getyx(status_win, y, x);
+			getmaxyx(status_win, ___, width);
+			if (rightlen < width - x) {
+				mvwprintw(status_win, 0, width - rightlen, "%s", right);
+				wmove(status_win, y, x);
+			}
+		}
+
 		return true;
 	}
 
@@ -380,12 +393,12 @@ update_status_window(struct view *view, const char *msg, va_list args)
 }
 
 void
-update_status(const char *msg, ...)
+update_status(const char *right, const char *msg, ...)
 {
 	va_list args;
 
 	va_start(args, msg);
-	update_status_window(display[current_view], msg, args);
+	update_status_window(display[current_view], right, msg, args);
 	va_end(args);
 }
 
@@ -404,7 +417,7 @@ report(const char *msg, ...)
 	}
 
 	va_start(args, msg);
-	if (update_status_window(view, msg, args))
+	if (update_status_window(view, "", msg, args))
 		wnoutrefresh(status_win);
 	va_end(args);
 
