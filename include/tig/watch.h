@@ -52,7 +52,7 @@ bool watch_dirty(struct watch *watch);
 enum watch_trigger watch_update(enum watch_event event);
 enum watch_trigger watch_update_single(struct watch *watch, enum watch_event event);
 void watch_apply(struct watch *source, enum watch_trigger changed);
-int watch_periodic(int interval);
+int watch_periodic(int interval, bool *periodic_event_passed);
 
 #endif
 /* vim: set ts=8 sw=8 noexpandtab: */

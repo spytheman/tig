@@ -257,7 +257,7 @@ watch_update(enum watch_event event)
 }
 
 int
-watch_periodic(int interval)
+watch_periodic(int interval, bool *periodic_event_passed)
 {
 	static time_t last_update;
 	int delay = -1;
@@ -268,6 +268,7 @@ watch_periodic(int interval)
 		if (!last_update)
 			last_update = now;
 		if (last_update + interval <= now) {
+			*periodic_event_passed = true;
 			watch_update(WATCH_EVENT_PERIODIC);
 			last_update = now;
 		}

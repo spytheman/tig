@@ -571,16 +571,14 @@ get_input(int prompt_position, struct key *key)
 		int delay = -1;
 
 		if (opt_refresh_mode == REFRESH_MODE_PERIODIC) {
-			delay = watch_periodic(opt_refresh_interval);
-			bool refs_refreshed = false;
-			foreach_displayed_view (view, i) {
-				if (view_can_refresh(view) &&
-					watch_dirty(&view->watch)) {
-					if (!refs_refreshed) {
-						load_refs(true);
-						refs_refreshed = true;
+			bool should_trigger_periodic_refresh = false;
+			delay = watch_periodic(opt_refresh_interval, &should_trigger_periodic_refresh);
+			if ( should_trigger_periodic_refresh ){
+				load_refs(true);
+				foreach_displayed_view (view, i) {
+					if( view_can_refresh(view) ){
+						refresh_view(view);
 					}
-					refresh_view(view);
 				}
 			}
 		}
