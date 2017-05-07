@@ -69,6 +69,7 @@ log_open(struct view *view, enum open_flags flags)
 			"--no-color", "--", "%(fileargs)", NULL
 	};
 
+	watch_register(&view->watch, WATCH_INDEX | WATCH_HEAD | WATCH_REFS);
 	return begin_update(view, NULL, log_argv, flags);
 }
 
