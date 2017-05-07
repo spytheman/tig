@@ -1,0 +1,117 @@
+#!/bin/sh
+
+. libtest.sh
+. libgit.sh
+
+export LINES=13
+
+steps '
+	:save-display status-with-unstaged.screen
+
+	:exec @git add a
+	:save-display status-after-add-a.screen
+
+	:exec @git commit -m "Commit changes"
+	:save-display status-after-commit.screen
+
+	:exec @git add b.c
+	:exec @git commit -m "Another change: hello"
+	:exec @sleep 2
+	:save-display status-after-commiting-change-and-sleeping-hello.screen
+
+	:exec @git add i.o
+	:exec @git commit -am "Another change: world"
+	:exec @sleep 2
+	:save-display status-after-commiting-change-and-sleeping-world.screen
+'
+
+tigrc <<EOF
+set refresh-mode = periodic
+set refresh-interval = 1
+EOF
+
+in_work_dir create_dirty_workdir
+
+export GIT_AUTHOR_DATE="$(expr $author_date + $author_date_delta)"
+export GIT_COMMITTER_DATE="$GIT_AUTHOR_DATE"
+
+test_tig status
+
+assert_equals 'status-with-unstaged.screen' <<EOF
+On branch master
+Changes to be committed:
+  (no files)
+Changes not staged for commit:
+M .j
+M a
+M b.c
+M e/f
+M g h
+Untracked files:
+  (no files)
+[status] Nothing to update                                                  100%
+EOF
+
+
+assert_equals 'status-after-add-a.screen' <<EOF
+On branch master
+Changes to be committed:
+M a
+Changes not staged for commit:
+M .j
+M b.c
+M e/f
+M g h
+Untracked files:
+  (no files)
+ 
+[status] Nothing to update                                                  100%
+EOF
+
+
+assert_equals 'status-after-commit.screen' <<EOF
+On branch master
+Changes to be committed:
+  (no files)
+Changes not staged for commit:
+M .j
+M b.c
+M e/f
+M g h
+Untracked files:
+  (no files)
+ 
+[status] Nothing to update                                                  100%
+EOF
+
+
+assert_equals 'status-after-commiting-change-and-sleeping-hello.screen' <<EOF
+On branch master
+Changes to be committed:
+  (no files)
+Changes not staged for commit:
+M .j
+M e/f
+M g h
+Untracked files:
+  (no files)
+ 
+ 
+[status] Nothing to update                                                  100%
+EOF
+
+
+assert_equals 'status-after-commiting-change-and-sleeping-world.screen' <<EOF
+On branch master
+Changes to be committed:
+  (no files)
+Changes not staged for commit:
+  (no files)
+Untracked files:
+  (no files)
+ 
+ 
+ 
+ 
+[status] Nothing to update                                                  100%
+EOF
